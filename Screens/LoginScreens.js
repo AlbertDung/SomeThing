@@ -39,11 +39,11 @@ const LoginScreen = ({ navigation }) => {
 
       // Successful login
       await signIn(userData, userData.role);
-      if (userData.role === 'admin') {
-        navigation.navigate('Home');
-      } else {
-        navigation.navigate('Homeuser');
-      }
+      // if (userData.role === 'admin') {
+      //   navigation.navigate('Home');
+      // } else if (userData.role === 'User'){
+      //   navigation.navigate('Homeuser');
+      // }
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login. Please try again.');

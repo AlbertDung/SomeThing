@@ -47,7 +47,7 @@ const Profile = ({ navigation }) => {
 
   const handleLogout = () => {
     signOut();
-    navigation.navigate('Login');
+    navigation.navigate('Auth', { screen: 'Login' });
   };
 
   const pickImage = async () => {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#DA0037',
   },
   editButton: {
-    backgroundColor: '#444444',
+    backgroundColor: '#444444',	
   },
   logoutButton: {
     backgroundColor: '#171717',

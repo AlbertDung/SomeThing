@@ -19,7 +19,8 @@ const HomeUser = () => {
   const [services, setServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { user } = useContext(AuthContext);
-  const { toggleFavorite, isFavorite } = useContext(FavoritesContext);
+  const { favorites, toggleFavorite, isFavorite } = useContext(FavoritesContext);
+  console.log('Current favorites:', favorites);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -69,7 +70,7 @@ const HomeUser = () => {
       ]).start();
       toggleFavorite(item.id);
     };
-
+    console.log(`Is ${item.id} a favorite:`, isFavorite(item.id));
     return (
       <TouchableOpacity
         style={styles.item}
