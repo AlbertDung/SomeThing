@@ -10,7 +10,7 @@ const theme = {
   accent: '#EDEDED',
 };
 
-const ServiceDetails = ({ route }) => {
+const ServiceDetailsUser = ({ route }) => {
   const { service } = route.params;
 
   const formatDate = (timestamp) => {
@@ -36,9 +36,9 @@ const ServiceDetails = ({ route }) => {
         <Text style={styles.header}>{service.name}</Text>
         
         <DetailRow icon="cash" label="Price" value={`$${service.price}`} />
-        <DetailRow icon="account" label="Creator" value={service.creator} />
+        {/* <DetailRow icon="account" label="Creator" value={service.creator} />
         <DetailRow icon="clock-outline" label="Created" value={formatDate(service.time)} />
-        <DetailRow icon="update" label="Last Updated" value={formatDate(service.update)} />
+        <DetailRow icon="update" label="Last Updated" value={formatDate(service.update)} /> */}
       </View>
     </ScrollView>
   );
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ServiceDetails;
+export default ServiceDetailsUser;

@@ -5,7 +5,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import { StatusBar } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { auth, db } from './firebaseConfig';
 
 // Import screens
@@ -19,28 +21,57 @@ import EditService from './Screens/EditService';
 import HomeUser from './Screens/HomeUser';
 import Favorites from './Screens/Favorites';
 import Profile from './Screens/Profile';
-
+import ServiceDetailsUser from './Screens/ServiceDetialsUser';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 export const FavoritesContext = createContext();
 export const AuthContext = React.createContext();
+
+
+const theme = {
+  dark: {
+    background: '#171717',
+    text: '#EDEDED',
+    primary: '#DA0037',
+    secondary: '#444444',
+    accent: '#F0F5F9',
+  },
+  light: {
+    background: '#F0F5F9',
+    text: '#171717',
+    primary: '#DA0037',
+    secondary: '#444444',
+    accent: '#EDEDED',
+  },
+};
 
 function AdminTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
           if (route.name === 'HomeTab') {
-            iconName = focused ? 'home' : 'home-outline';
+            return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />;
           } else if (route.name === 'Transaction') {
-            iconName = focused ? 'receipt' : 'receipt-outline';
+            return <AntDesign name={focused ? 'cloud' : 'cloudo'} size={size} color={color} />;
           } else if (route.name === 'Customer') {
-            iconName = focused ? 'people' : 'people-outline';
-          } else if (route.name === 'Setting') {
-            iconName = focused ? 'settings' : 'settings-outline';
+            return <Ionicons name={focused ? 'people-sharp' : 'people-outline'} size={size} color={color} />;
+          } else if (route.name === 'Setting') {  
+            return <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size} color={color} />;
           }
-          return <Icon name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: theme.light.primary,
+        tabBarInactiveTintColor: theme.light.secondary,
+        tabBarStyle: {
+          backgroundColor: theme.light.background,
+          borderTopWidth: 0,
+          elevation: 8,
+          height: 60,
+          paddingBottom: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: 'bold',
         },
       })}
     >
@@ -58,7 +89,19 @@ function AdminTabNavigator() {
 
 function AdminStackNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator 
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.light.background,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTintColor: theme.light.text,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
       <Stack.Screen 
         name="Home" 
         component={Home}
@@ -66,9 +109,9 @@ function AdminStackNavigator() {
           headerRight: () => (
             <Icon 
               name="account-circle" 
-              size={24} 
-              color="#000" 
-              style={{ marginRight: 15 }}
+              size={28} 
+              color={theme.light.primary}
+              style={{ marginRight: 25 }}
               onPress={() => navigation.navigate('Profile')}
             />
           ),
@@ -82,20 +125,31 @@ function AdminStackNavigator() {
   );
 }
 
-function UserTabNavigator() {
+function UserTabNavigator() { 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Favorites') {
-            iconName = focused ? 'favorite' : 'favorite-border';
-          }
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-      })}
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        if (route.name === 'HomeTab') {
+          return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />;
+        } else if (route.name === 'Favorites') {
+          return <AntDesign name={focused ? 'heart' : 'hearto'} size={size} color={color} />;
+        } 
+      },
+      tabBarActiveTintColor: theme.light.primary,
+      tabBarInactiveTintColor: theme.light.secondary,
+      tabBarStyle: {
+        backgroundColor: theme.light.background,
+        borderTopWidth: 0,
+        elevation: 8,
+        height: 60,
+        paddingBottom: 8,
+      },
+      tabBarLabelStyle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
+    })}
     >
         <Tab.Screen 
         name="HomeTab" 
@@ -108,26 +162,38 @@ function UserTabNavigator() {
   );
 }
 
-function UserStack() {
+function UserStack() {  
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator 
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.light.background,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTintColor: theme.light.text,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
       <Stack.Screen 
-        name="HomeUser" 
+        name="Home" 
         component={HomeUser}
         options={({ navigation }) => ({
           headerRight: () => (
             <Icon 
               name="account-circle" 
-              size={24} 
-              color="#000" 
-              style={{ marginRight: 15 }}
+              size={28} 
+              color={theme.light.primary}
+              style={{ marginRight: 25 }}
               onPress={() => navigation.navigate('Profile')}
             />
           ),
         })}
       />
       <Stack.Screen name="Profile" component={Profile} />
-      <Stack.Screen name="ServiceDetail" component={ServiceDetail} />
+      <Stack.Screen name="ServiceDetailsUser" component={ServiceDetailsUser} />
       {/* <Stack.Screen name="Favorites" component={Favorites} /> */}
     </Stack.Navigator>
   );
@@ -135,7 +201,12 @@ function UserStack() {
 
 function AuthStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: theme.light.background }
+      }}
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
@@ -242,6 +313,7 @@ function App() {
     <AuthContext.Provider value={authContext}>
       <FavoritesContext.Provider value={favoritesContext}>
         <NavigationContainer>
+          <StatusBar backgroundColor={theme.light.background} barStyle="dark-content" />
           <RootNavigator />
         </NavigationContainer>
       </FavoritesContext.Provider>

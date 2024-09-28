@@ -2,18 +2,42 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Animated } from 'react-native';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AuthContext, FavoritesContext } from '../App';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
+
+const theme = {
+  background: '#F0F5F9',
+  text: '#171717',
+  primary: '#DA0037',
+  secondary: '#444444',
+  accent: '#EDEDED',
+};
 
 const HomeUser = () => {
   const [services, setServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { user } = useContext(AuthContext);
   const { toggleFavorite, isFavorite } = useContext(FavoritesContext);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    fetchServices();
-  }, []);
+    navigation.setOptions({
+      headerTitle: `Welcome, ${user?.fullname || 'User'}`,
+      headerRight: () => (
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.avatarButton}>
+          <AntDesign name="user" size={24} color={theme.text} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, user]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchServices();
+    }, [])
+  );
 
   const fetchServices = async () => {
     const servicesCollection = collection(db, 'service');
@@ -47,81 +71,115 @@ const HomeUser = () => {
     };
 
     return (
-      <View style={styles.item}>
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => navigation.navigate('ServiceDetailsUser', { service: item })}
+      >
         <View style={styles.serviceInfo}>
           <Text style={styles.title}>{item.name}</Text>
-          <Text>Price: ${item.price}</Text>
+          <Text style={styles.price}>${item.price}</Text>
+          {/* <Text style={styles.creator}>Created by: {item.creator}</Text> */}
         </View>
         <TouchableOpacity onPress={animateHeart}>
           <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-            <Icon 
-              name={isFavorite(item.id) ? "favorite" : "favorite-border"} 
+            <AntDesign 
+              name={isFavorite(item.id) ? "heart" : "hearto"} 
               size={24} 
-              color={isFavorite(item.id) ? "red" : "#000"} 
+              color={isFavorite(item.id) ? theme.primary : theme.secondary} 
             />
           </Animated.View>
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder="Search services"
-      />
-      <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-        <Text style={styles.searchButtonText}>Search</Text>
-      </TouchableOpacity>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search services..."
+          placeholderTextColor={theme.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearch}
+        />
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <AntDesign name="search1" size={24} color={theme.accent} />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={services}
         renderItem={renderItem}
         keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
       />
     </View>
   );
-};  
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: theme.background,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1,
+    borderColor: theme.secondary,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    backgroundColor: theme.accent,
+    color: theme.text,
+  },
+  searchButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: theme.primary,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  list: {
+    paddingBottom: 16,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    backgroundColor: theme.accent,
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    elevation: 2,
   },
   serviceInfo: {
     flex: 1,
   },
   title: {
     fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: theme.text,
   },
-  searchInput: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 16,
+  price: {
+    fontSize: 16,
+    color: theme.primary,
+    marginBottom: 4,
   },
-  searchButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    marginBottom: 16,
-    borderRadius: 5,
+  creator: {
+    fontSize: 14,
+    color: theme.secondary,
   },
-  searchButtonText: {
-    color: 'white',
-    textAlign: 'center',
+  avatarButton: {
+    marginRight: 16,
   },
 });
 

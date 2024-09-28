@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert, Animated } from 'react-native';
 import { AuthContext } from '../App';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -14,6 +14,7 @@ const Profile = ({ navigation }) => {
   const [phone, setPhone] = useState(user?.phone || '');
   const [address, setAddress] = useState(user?.address || '');
   const [avatar, setAvatar] = useState(null);
+  const [animatedValue] = useState(new Animated.Value(0));
 
   useEffect(() => {
     (async () => {
@@ -26,13 +27,10 @@ const Profile = ({ navigation }) => {
 
   const handleSave = async () => {
     try {
-      console.log('User object:', user);
       if (!user || !user.id) {
         throw new Error('User ID is missing');
       }
-      console.log('User ID:', user.id);
       const userRef = doc(db, 'user', user.id);
-      console.log('User reference:', userRef);
       await updateDoc(userRef, {
         fullname,
         email,
@@ -62,8 +60,6 @@ const Profile = ({ navigation }) => {
 
     if (!result.canceled) {
       setAvatar(result.uri);
-      // Here you would typically upload the image to your server or cloud storage
-      // and update the user's avatar URL in the database
     }
   };
 
@@ -73,6 +69,26 @@ const Profile = ({ navigation }) => {
       .map((n) => n[0])
       .join('')
       .toUpperCase();
+  };
+
+  const animateInput = () => {
+    Animated.timing(animatedValue, {
+      toValue: editing ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  useEffect(() => {
+    animateInput();
+  }, [editing]);
+
+  const inputStyle = {
+    ...styles.input,
+    backgroundColor: animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['#F0F5F9', '#EDEDED'],
+    }),
   };
 
   return (
@@ -85,37 +101,48 @@ const Profile = ({ navigation }) => {
             <Text style={styles.avatarInitials}>{getInitials(fullname)}</Text>
           </View>
         )}
-        <Icon name="camera-alt" size={24} color="#fff" style={styles.cameraIcon} />
+        <View style={styles.cameraIconContainer}>
+          <Icon name="camera-alt" size={20} color="#EDEDED" />
+        </View>
       </TouchableOpacity>
 
       <View style={styles.infoContainer}>
         {editing ? (
           <>
-            <TextInput
-              style={styles.input}
-              value={fullname}
-              onChangeText={setFullname}
-              placeholder="Full Name"
-            />
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email"
-              keyboardType="email-address"
-            />
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="Phone" keyboardType="phone-pad"
-            />
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Address"
-            />
+            <Animated.View style={inputStyle}>
+              <TextInput
+                value={fullname}
+                onChangeText={setFullname}
+                placeholder="Full Name"
+                placeholderTextColor="#444444"
+              />
+            </Animated.View>
+            <Animated.View style={inputStyle}>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Email"
+                keyboardType="email-address"
+                placeholderTextColor="#444444"
+              />
+            </Animated.View>
+            <Animated.View style={inputStyle}>
+              <TextInput
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Phone"
+                keyboardType="phone-pad"
+                placeholderTextColor="#444444"
+              />
+            </Animated.View>
+            <Animated.View style={inputStyle}>
+              <TextInput
+                value={address}
+                onChangeText={setAddress}
+                placeholder="Address"
+                placeholderTextColor="#444444"
+              />
+            </Animated.View>
           </>
         ) : (
           <>
@@ -127,18 +154,17 @@ const Profile = ({ navigation }) => {
         )}
       </View>
 
-      {editing ? (
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={[styles.button, editing ? styles.saveButton : styles.editButton]}
+        onPress={editing ? handleSave : () => setEditing(true)}
+      >
+        <Text style={styles.buttonText}>
+          {editing ? 'Save Changes' : 'Edit Profile'}
+        </Text>
+      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
+      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -147,81 +173,78 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
+    backgroundColor: '#F0F5F9',
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginBottom: 20,
+    elevation: 5,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#4CAF50',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#DA0037',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarInitials: {
-    fontSize: 24,
-    color: '#fff',
+    fontSize: 40,
+    color: '#EDEDED',
   },
-  cameraIcon: {
+  cameraIconContainer: {
     position: 'absolute',
     bottom: 0,
     right: 0,
+    backgroundColor: '#444444',
+    borderRadius: 20,
     padding: 8,
   },
   infoContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
+    height: 50,
+    borderColor: '#444444',
     borderWidth: 1,
+    borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 8,
     marginBottom: 16,
+    color: '#171717',
   },
   infoText: {
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 12,
+    color: '#171717',
+  },
+  button: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
   },
   saveButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    backgroundColor: '#DA0037',
   },
   editButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    backgroundColor: '#444444',
   },
   logoutButton: {
-    backgroundColor: '#F44336',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#171717',
   },
-  logoutButtonText: {
-    color: '#fff',
+  buttonText: {
+    color: '#EDEDED',
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

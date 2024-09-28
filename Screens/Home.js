@@ -5,6 +5,15 @@ import { db } from '../firebaseConfig';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { AuthContext } from '../App';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
+const theme = {
+  background: '#F0F5F9',
+  text: '#171717',
+  primary: '#DA0037',
+  secondary: '#444444',
+  accent: '#EDEDED',
+};
 
 const Home = () => {
   const [services, setServices] = useState([]);
@@ -13,7 +22,7 @@ const Home = () => {
   const [newService, setNewService] = useState({ name: '', price: '' });
   const { user } = useContext(AuthContext);
   const navigation = useNavigation();
-
+  
   useEffect(() => {
     navigation.setOptions({
       headerTitle: `${user?.fullname || 'Admin'}`,
@@ -25,9 +34,9 @@ const Home = () => {
     });
   }, [navigation, user]);
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [user]);
+  // useEffect(() => {
+  //   fetchFavorites();
+  // }, [user]);
 
 
   useFocusEffect(
@@ -101,30 +110,32 @@ const Home = () => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <TouchableOpacity
-        style={styles.serviceInfo}
-        onPress={() => navigation.navigate('ServiceDetail', { service: item })}
-      >
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => navigation.navigate('ServiceDetail', { service: item })}
+    >
+      <View style={styles.serviceInfo}>
         <Text style={styles.title}>{item.name}</Text>
         <Text style={styles.price}>${item.price}</Text>
         <Text style={styles.creator}>Created by: {item.creator}</Text>
-      </TouchableOpacity>
+      </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate('EditService', { service: { ...item, id: item.id } })}
         >
-          <Icon name="edit" size={24} color="#4CAF50" />
+          {/* <Icon name="pencil" size={24} color={theme.primary} /> */}
+          <Feather name="edit" size={24} color={theme.primary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => handleDelete(item.id)}
         >
-          <Icon name="delete" size={24} color="#F44336" />
+          {/* <Icon name="delete" size={24} color={theme.primary} /> */}
+          <AntDesign name="delete" size={24} color={theme.primary}  />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -133,12 +144,14 @@ const Home = () => {
         <TextInput
           style={styles.searchInput}
           placeholder="Search services..."
+          placeholderTextColor={theme.secondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
         />
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Icon name="search" size={24} color="#fff" />
+          {/* <Icon name="search" size={24} color={theme.accent} /> */}
+          <AntDesign name="search1" size={24} color={theme.accent} />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -151,7 +164,8 @@ const Home = () => {
         style={styles.addButton}
         onPress={() => setIsAddServiceVisible(true)}
       >
-        <Icon name="add" size={24} color="#fff" />
+        {/* <Icon name="plus" size={24} color={theme.accent} /> */}
+        <AntDesign name="plus" size={24} color={theme.accent}  />
       </TouchableOpacity>
       <Modal
         visible={isAddServiceVisible}
@@ -165,12 +179,14 @@ const Home = () => {
             <TextInput
               style={styles.input}
               placeholder="Service Name"
+              placeholderTextColor={theme.secondary}
               value={newService.name}
               onChangeText={(text) => setNewService({ ...newService, name: text })}
             />
             <TextInput
               style={styles.input}
               placeholder="Price"
+              placeholderTextColor={theme.secondary}
               value={newService.price}
               onChangeText={(text) => setNewService({ ...newService, price: text })}
               keyboardType="numeric"
@@ -197,7 +213,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.background,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -205,18 +221,19 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 40,
+    height: 48,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
+    borderColor: theme.secondary,
+    borderRadius: 24,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: theme.accent,
+    color: theme.text,
   },
   searchButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#4CAF50',
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    backgroundColor: theme.primary,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
@@ -228,7 +245,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: theme.accent,
     padding: 16,
     marginBottom: 8,
     borderRadius: 8,
@@ -241,15 +258,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: theme.text,
   },
   price: {
     fontSize: 16,
-    color: '#4CAF50',
+    color: theme.primary,
     marginBottom: 4,
   },
   creator: {
     fontSize: 14,
-    color: '#666',
+    color: theme.secondary,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -264,7 +282,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#4CAF50',
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -277,7 +295,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: theme.accent,
     borderRadius: 8,
     padding: 16,
     elevation: 5,
@@ -286,38 +304,37 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: theme.text,
   },
   input: {
-    height: 40,
+    height: 48,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: theme.secondary,
     borderRadius: 8,
     marginBottom: 16,
     paddingHorizontal: 8,
+    color: theme.text,
   },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   modalButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: theme.primary,
     padding: 12,
     borderRadius: 8,
     flex: 1,
     marginRight: 8,
   },
   cancelButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: theme.secondary,
     marginRight: 0,
     marginLeft: 8,
   },
   modalButtonText: {
-    color: '#fff',
+    color: theme.accent,
     textAlign: 'center',
     fontWeight: 'bold',
-  },
-  avatarButton: {
-    marginRight: 16,
   },
 });
 
