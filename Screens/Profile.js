@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert, Animated } from 'react-native';
 import { AuthContext } from '../App';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -13,7 +14,7 @@ const Profile = ({ navigation }) => {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [address, setAddress] = useState(user?.address || '');
-  const [avatar, setAvatar] = useState(null);
+  const [avatar, setAvatar] = useState(user?.avatar || null);
   const [animatedValue] = useState(new Animated.Value(0));
 
   useEffect(() => {
@@ -31,12 +32,19 @@ const Profile = ({ navigation }) => {
         throw new Error('User ID is missing');
       }
       const userRef = doc(db, 'user', user.id);
-      await updateDoc(userRef, {
+      const updatedData = {
         fullname,
         email,
         phone,
         address,
-      });
+      };
+
+      if (avatar && avatar !== user.avatar) {
+        const avatarUrl = await uploadAvatar(avatar);
+        updatedData.avatar = avatarUrl;
+      }
+
+      await updateDoc(userRef, updatedData);
       setEditing(false);
       Alert.alert('Profile updated successfully');
     } catch (error) {
@@ -45,9 +53,18 @@ const Profile = ({ navigation }) => {
     }
   };
 
+  const uploadAvatar = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const filename = `avatars/${user.id}_${Date.now()}.jpg`;
+    const storageRef = ref(storage, filename);
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  };
+
   const handleLogout = () => {
     signOut();
-    navigation.navigate('Auth', { screen: 'Login' });
+    //navigation.navigate('Auth', { screen: 'Login' });
   };
 
   const pickImage = async () => {
@@ -59,7 +76,7 @@ const Profile = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setAvatar(result.uri);
+      setAvatar(result.assets[0].uri);
     }
   };
 

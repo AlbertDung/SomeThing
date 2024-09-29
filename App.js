@@ -22,7 +22,7 @@
   import Favorites from './Screens/Favorites';
   import Profile from './Screens/Profile';
   import ServiceDetailsUser from './Screens/ServiceDetialsUser';
-
+  
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
   const RootStack = createStackNavigator();
@@ -133,7 +133,7 @@
       <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          if (route.name === 'HomeTab') {
+          if (route.name === 'HomeUser') {
             return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />;
           } else if (route.name === 'Favorites') {
             return <AntDesign name={focused ? 'heart' : 'hearto'} size={size} color={color} />;
@@ -158,7 +158,7 @@
       })}
       >
           <Tab.Screen 
-          name="HomeTab" 
+          name="HomeUser" 
           component={UserStack}
           options={{ headerShown: false, title: 'Home' }}
         />
@@ -220,21 +220,7 @@
       </Stack.Navigator>
     );
   }
-  // function AppNavigator() {
-  //   return (
-  //     <Stack.Navigator 
-  //       screenOptions={{
-  //       headerShown: false,
-  //       cardStyle: { backgroundColor: theme.light.background }
-  //     }}
-  //     >
-  //       <Stack.Screen name="Login" component={LoginScreen} />
-  //       <Stack.Screen name="HomeUser" component={UserTabNavigator} />
-  //       <Stack.Screen name="Home" component={AdminTabNavigator} />
-        
-  //     </Stack.Navigator>
-  //   );
-  // }
+ 
   function MainNavigator() {
     const { user, userRole } = React.useContext(AuthContext);
   
@@ -335,9 +321,13 @@
           }, {}) || {});
         },
         signOut: () => {
-          setUser(null);
-          setUserRole(null);
-          setFavorites({});
+          auth.signOut().then(() => {
+            setUser(null);
+            setUserRole(null);
+            setFavorites({});
+          }).catch((error) => {
+            console.error('Error signing out: ', error);
+          });
         },
         user,
         userRole,
@@ -350,7 +340,7 @@
         <FavoritesContext.Provider value={favoritesContext}>
           <NavigationContainer>
             <StatusBar backgroundColor={theme.light.background} barStyle="dark-content" />
-            <RootNavigator />
+            <MainNavigator />
           </NavigationContainer>
         </FavoritesContext.Provider>
       </AuthContext.Provider>

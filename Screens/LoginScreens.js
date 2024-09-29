@@ -40,9 +40,9 @@ const LoginScreen = ({ navigation }) => {
       // Successful login
       await signIn(userData, userData.role);
       // if (userData.role === 'admin') {
-      //   navigation.navigate('Home');
+      //   navigation.navigate('Auth', { screen: 'Home' });
       // } else if (userData.role === 'User'){
-      //   navigation.navigate('Homeuser');
+      //   navigation.navigate('Main', { screen: 'HomeUser' });
       // }
     } catch (error) {
       console.error('Login error:', error);
